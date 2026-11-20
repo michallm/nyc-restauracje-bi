@@ -3,12 +3,11 @@
 Projekt na kurs **Systemy Business Intelligence, PWr**. Repozytorium zawiera gotową,
 połączoną infrastrukturę do samodzielnego zbudowania rozwiązania BI dla danych NYC.
 
-Po uruchomieniu stos jest pusty:
+Po pierwszym uruchomieniu:
 
 - PostgreSQL ma bazę `nyc`, rozszerzenie PostGIS i pusty schemat `staging`,
 - ClickHouse ma pustą bazę `nyc`,
-- Superset ma gotowe połączenia `ClickHouse NYC` i `PostGIS staging`, ale nie ma
-  datasetów, wykresów ani dashboardów,
+- Superset ma gotowe połączenia `ClickHouse NYC` i `PostGIS staging` oraz dashboard mapowy,
 - Dagster nie ma jeszcze assetów,
 - Prefect nie ma jeszcze flow, deploymentów ani uruchomień.
 
@@ -51,6 +50,24 @@ Jeśli port 80 jest zajęty, zmień `PORTAL_PORT=80` w `.env`, np. na `8090`, i 
 
 Flow Prefect dodaj w `pipeline/`, a jego deployment dopisz do listy `deployments` w
 `pipeline/serve.py`. Assety Dagster dodaj w `dagster/definitions.py`.
+
+## Pobieranie skarg 311
+
+Flow `complaints-311` codziennie o 06:00 czasu Europe/Warsaw pobiera skargi dotyczące
+lokali gastronomicznych z NYC Open Data. Pierwsze uruchomienie pobiera cały zbiór, a
+kolejne aktualizują zmienione rekordy i oznaczają rekordy usunięte ze źródła.
+
+Flow można uruchomić w Prefect przez **Run** na deploymencie
+`complaints-311/daily` albo poleceniem:
+
+```text
+docker compose exec prefect-worker prefect deployment run 'complaints-311/daily'
+```
+
+Dane są widoczne w Pgweb w tabeli `staging.complaints_311`, a historia udanych
+aktualizacji w Dagster przy assetcie `staging/complaints_311`.
+
+W Superset → **Dashboards → Skargi 311 — mapa** jest automatycznie tworzona przy pierwszym starcie mapa punktów i mapa ciepła (dane pojawią się po pobraniu skarg).
 
 ## Zatrzymanie
 

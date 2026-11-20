@@ -33,6 +33,7 @@ x-superset: &superset
   volumes:
     - ./docker/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
     - ./docker/superset/init.sh:/app/init-nyc.sh:ro
+    - ./superset/assets:/app/nyc-assets:ro
   logging: *logging
 
 services:

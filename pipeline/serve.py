@@ -1,10 +1,17 @@
 import time
 
 from prefect import serve
+from prefect.schedules import Cron
+
+from flows.complaints_311 import complaints_311
 
 
 deployments = [
-    # my_flow.to_deployment(name="daily", cron="0 6 * * *"),
+    complaints_311.to_deployment(
+        name="daily",
+        schedule=Cron("0 6 * * *", timezone="Europe/Warsaw"),
+        paused=False,
+    )
 ]
 
 

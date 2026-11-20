@@ -1,0 +1,222 @@
+dashboard_title: "Skargi 311 \u2014 mapa"
+description: null
+css: null
+slug: skargi-311-mapa
+certified_by: null
+certification_details: null
+published: true
+uuid: 743a3d61-24d2-466b-9be5-dc341819103a
+position:
+  DASHBOARD_VERSION_KEY: v2
+  ROOT_ID:
+    type: ROOT
+    id: ROOT_ID
+    children:
+    - GRID_ID
+  GRID_ID:
+    type: GRID
+    id: GRID_ID
+    children:
+    - ROW-1
+    - ROW-2
+    - ROW-CREDITS
+    parents:
+    - ROOT_ID
+  HEADER_ID:
+    type: HEADER
+    id: HEADER_ID
+    meta:
+      text: "Skargi 311 \u2014 mapa"
+  ROW-1:
+    type: ROW
+    id: ROW-1
+    children:
+    - CHART-1
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-1:
+    type: CHART
+    id: CHART-1
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    meta:
+      chartId: 1
+      uuid: 3920100a-adfa-41ef-b65b-af58149927b0
+      width: 12
+      height: 80
+      sliceName: "Skargi 311 \u2014 mapa punkt\xF3w"
+  ROW-2:
+    type: ROW
+    id: ROW-2
+    children:
+    - CHART-2
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  CHART-2:
+    type: CHART
+    id: CHART-2
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-2
+    meta:
+      chartId: 2
+      uuid: 3a478fcb-ad54-40c4-b58b-07bb8b6ce41b
+      width: 12
+      height: 80
+      sliceName: "Skargi 311 \u2014 mapa ciep\u0142a"
+  ROW-CREDITS:
+    type: ROW
+    id: ROW-CREDITS
+    children:
+    - MARKDOWN-CREDITS
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    meta:
+      background: BACKGROUND_TRANSPARENT
+  MARKDOWN-CREDITS:
+    type: MARKDOWN
+    id: MARKDOWN-CREDITS
+    children: []
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-CREDITS
+    meta:
+      width: 12
+      height: 8
+      code: "Dane: NYC Open Data \xB7 Mapa: Esri, \xA9 OpenStreetMap contributors"
+      background: BACKGROUND_TRANSPARENT
+metadata:
+  native_filter_configuration:
+  - id: NATIVE_FILTER-time
+    name: Okres
+    filterType: filter_time
+    targets:
+    - {}
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    controlValues: {}
+  - id: NATIVE_FILTER-borough
+    name: Dzielnica
+    filterType: filter_select
+    targets:
+    - column:
+        name: borough
+      datasetUuid: 17c901ab-a7d8-415a-9995-c92d8169e6b7
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+  - id: NATIVE_FILTER-complaint_type
+    name: Rodzaj skargi
+    filterType: filter_select
+    targets:
+    - column:
+        name: descriptor_category
+      datasetUuid: 17c901ab-a7d8-415a-9995-c92d8169e6b7
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+  - id: NATIVE_FILTER-status
+    name: Status
+    filterType: filter_select
+    targets:
+    - column:
+        name: status
+      datasetUuid: 17c901ab-a7d8-415a-9995-c92d8169e6b7
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - ROOT_ID
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  refresh_frequency: 0
+  color_scheme: supersetColors
+  label_colors: {}
+  shared_label_colors: []
+  cross_filters_enabled: false
+  color_scheme_domain:
+  - '#1FA8C9'
+  - '#454E7C'
+  - '#5AC189'
+  - '#FF7F44'
+  - '#666666'
+  - '#E04355'
+  - '#FCC700'
+  - '#A868B7'
+  - '#3CCCCB'
+  - '#A38F79'
+  - '#8FD3E4'
+  - '#A1A6BD'
+  - '#ACE1C4'
+  - '#FEC0A1'
+  - '#B2B2B2'
+  - '#EFA1AA'
+  - '#FDE380'
+  - '#D3B3DA'
+  - '#9EE5E5'
+  - '#D1C6BC'
+  map_label_colors: {}
+theme_uuid: null
+version: 1.0.0

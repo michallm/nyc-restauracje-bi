@@ -1,0 +1,68 @@
+slice_name: "Skargi 311 \u2014 mapa ciep\u0142a"
+description: null
+certified_by: null
+certification_details: null
+viz_type: deck_heatmap
+params:
+  datasource: 1__table
+  spatial:
+    type: latlong
+    lonCol: longitude
+    latCol: latitude
+  granularity_sqla: created_date
+  time_range: No filter
+  time_grain_sqla: null
+  row_limit: 100000
+  filter_nulls: true
+  adhoc_filters: []
+  mapbox_style: tile://https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}
+  viewport:
+    latitude: 40.71
+    longitude: -73.95
+    zoom: 10
+    bearing: 0
+    pitch: 0
+  autozoom: false
+  viz_type: deck_heatmap
+  size: count
+  color_scheme_type: linear_palette
+  linear_color_scheme: schemeYlOrRd
+  intensity: 0.25
+  radius_pixels: 15
+  aggregation: sum
+  slice_id: 2
+query_context: '{"datasource": {"id": 1, "type": "table"}, "force": false, "queries":
+  [{"time_range": "No filter", "granularity": "created_date", "filters": [{"col":
+  "longitude", "op": "IS NOT NULL", "val": null}, {"col": "latitude", "op": "IS NOT
+  NULL", "val": null}], "extras": {"time_grain_sqla": null, "having": "", "where":
+  ""}, "applied_time_extras": {}, "columns": ["longitude", "latitude"], "metrics":
+  ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit":
+  100000, "series_limit": 0, "group_others_when_limit_reached": false, "order_desc":
+  true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "is_timeseries":
+  false}], "form_data": {"datasource": "1__table", "viz_type": "deck_heatmap", "slice_id":
+  2, "url_params": {}, "matrixify_enable": false, "matrixify_mode_columns": "disabled",
+  "matrixify_dimension_selection_mode_columns": "members", "matrixify_dimension_columns":
+  {"dimension": "", "values": []}, "matrixify_topn_value_columns": 10, "matrixify_all_sort_by_columns":
+  "a_to_z", "matrixify_topn_order_columns": true, "matrixify_show_column_headers":
+  true, "matrixify_fit_columns_dynamically": true, "matrixify_mode_rows": "disabled",
+  "matrixify_dimension_selection_mode_rows": "members", "matrixify_dimension_rows":
+  {"dimension": "", "values": []}, "matrixify_topn_value_rows": 10, "matrixify_all_sort_by_rows":
+  "a_to_z", "matrixify_topn_order_rows": true, "matrixify_show_row_labels": true,
+  "matrixify_row_height": 300, "matrixify_charts_per_row": 4, "matrixify_cell_title_template":
+  "", "spatial": {"type": "latlong", "lonCol": "longitude", "latCol": "latitude"},
+  "size": "count", "row_limit": 100000, "filter_nulls": true, "adhoc_filters": [],
+  "tooltip_contents": [], "tooltip_template": "", "intensity": 0.25, "radius_pixels":
+  15, "mapbox_style": "tile://https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+  "viewport": {"latitude": 40.71, "longitude": -73.95, "zoom": 10, "bearing": 0, "pitch":
+  0}, "color_scheme_type": "linear_palette", "color_picker": {"r": 0, "g": 122, "b":
+  135, "a": 1}, "linear_color_scheme": "schemeYlOrRd", "autozoom": false, "aggregation":
+  "sum", "js_columns": [], "js_data_mutator": "", "js_tooltip": "", "js_onclick_href":
+  "", "granularity_sqla": "created_date", "time_grain_sqla": null, "time_range": "No
+  filter", "chart_id": 2, "label_colors": {}, "shared_label_colors": [], "map_label_colors":
+  {}, "color_scheme": "supersetColors", "extra_filters": [], "extra_form_data": {},
+  "dashboardId": 1, "force": false, "result_format": "json", "result_type": "full"},
+  "result_format": "json", "result_type": "full"}'
+cache_timeout: 600
+uuid: 3a478fcb-ad54-40c4-b58b-07bb8b6ce41b
+version: 1.0.0
+dataset_uuid: 17c901ab-a7d8-415a-9995-c92d8169e6b7

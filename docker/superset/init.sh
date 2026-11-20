@@ -52,3 +52,33 @@ with app.app_context():
     db.session.commit()
 PY
 superset init
+python - <<'PY'
+import os
+import subprocess
+from pathlib import Path
+from uuid import UUID
+from zipfile import ZipFile
+
+from superset import db
+from superset.app import create_app
+
+app = create_app()
+with app.app_context():
+    from superset.models.dashboard import Dashboard
+
+    dashboard = db.session.query(Dashboard).filter_by(
+        uuid=UUID("743a3d61-24d2-466b-9be5-dc341819103a")
+    ).one_or_none()
+    missing = dashboard is None
+
+if missing:
+    assets = Path("/app/nyc-assets")
+    with ZipFile("/tmp/nyc-map.zip", "w") as bundle:
+        for path in sorted(assets.rglob("*.yaml")):
+            bundle.write(path, Path("nyc-map") / path.relative_to(assets))
+    subprocess.run([
+        "superset", "import-dashboards", "-p", "/tmp/nyc-map.zip",
+        "-u", os.environ["BI_USER"],
+    ], check=True)
+    subprocess.run(["superset", "init"], check=True)
+PY
