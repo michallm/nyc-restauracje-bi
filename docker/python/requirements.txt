@@ -1,0 +1,7 @@
+prefect==3.9.4
+dagster==1.13.30
+dagster-webserver==1.13.30
+dagster-postgres==0.29.30
+psycopg[binary]==3.3.9
+clickhouse-connect==1.13.0
+requests==2.34.2

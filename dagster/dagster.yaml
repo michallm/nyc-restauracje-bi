@@ -1,0 +1,10 @@
+storage:
+  postgres:
+    postgres_db:
+      username: {env: BI_USER}
+      password: {env: BI_PASSWORD}
+      hostname: postgres
+      db_name: dagster
+      port: 5432
+telemetry:
+  enabled: false

@@ -1,0 +1,203 @@
+name: nyc-bi
+
+x-python: &python
+  image: nyc-bi-python:3.12-prefect3.9.4-dagster1.13.30
+  restart: unless-stopped
+  init: true
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "2"
+
+x-pipeline-env: &pipeline-env
+  BI_USER: ${BI_USER}
+  BI_PASSWORD: ${BI_PASSWORD}
+  PREFECT_API_URL: http://prefect-server:4200/api
+  PREFECT_LOGGING_LOG_PRINTS: "true"
+  PREFECT_RUNNER_SERVER_HOST: 0.0.0.0
+  PREFECT_SERVER_ANALYTICS_ENABLED: "false"
+  NYC_DATABASE_URL: postgresql://${BI_USER}:${BI_PASSWORD}@postgres:5432/nyc
+  DAGSTER_URL: http://dagster:3000
+  CLICKHOUSE_HOST: clickhouse
+  CLICKHOUSE_USER: ${BI_USER}
+  CLICKHOUSE_PASSWORD: ${BI_PASSWORD}
+
+x-superset: &superset
+  image: nyc-bi-superset:6.1.0
+  environment:
+    BI_USER: ${BI_USER}
+    BI_PASSWORD: ${BI_PASSWORD}
+    SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+    SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+  volumes:
+    - ./docker/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+    - ./docker/superset/init.sh:/app/init-nyc.sh:ro
+  logging: *logging
+
+services:
+  postgres:
+    image: imresamu/postgis:18-3.6.1-alpine3.22@sha256:b6d7b07ea41f403d5c64358f9869d133f9d0f6b4fd1eb8272cd8e8ed0bdd1f4a
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${BI_USER}
+      POSTGRES_PASSWORD: ${BI_PASSWORD}
+      POSTGRES_DB: bi
+    ports: ["5433:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/10-nyc.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d nyc"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 768m
+    logging: *logging
+
+  pgweb:
+    image: sosedoff/pgweb:0.17.0@sha256:a5256d416e2e8b92d69a4459058e3eca33a9f075d8325491644411d0bc3bd70b
+    restart: unless-stopped
+    command:
+      - --url
+      - postgres://${BI_USER}:${BI_PASSWORD}@postgres:5432/nyc?sslmode=disable
+      - --bind
+      - 0.0.0.0
+      - --listen
+      - "8081"
+      - --readonly
+      - --skip-open
+    ports: ["8081:8081"]
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8081/api/connection"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    mem_limit: 128m
+    logging: *logging
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.10.7.24@sha256:2e107973b8a8bed7e76b104e0fadb8ce591da9b1cc5bb94aa048208c50b5d658
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: nyc
+      CLICKHOUSE_USER: ${BI_USER}
+      CLICKHOUSE_PASSWORD: ${BI_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports: ["8123:8123", "9000:9000"]
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./docker/clickhouse/init.sql:/docker-entrypoint-initdb.d/10-nyc.sql:ro
+    ulimits:
+      nofile: {soft: 262144, hard: 262144}
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --user \"$$CLICKHOUSE_USER\" --password \"$$CLICKHOUSE_PASSWORD\" --query 'select 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 1536m
+    logging: *logging
+
+  prefect-server:
+    <<: *python
+    build: ./docker/python
+    command: prefect server start --host 0.0.0.0
+    environment:
+      BI_USER: ${BI_USER}
+      BI_PASSWORD: ${BI_PASSWORD}
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://${BI_USER}:${BI_PASSWORD}@postgres:5432/prefect
+      PREFECT_API_URL: http://localhost:4200/api
+      PREFECT_UI_API_URL: /api
+      PREFECT_SERVER_ANALYTICS_ENABLED: "false"
+    ports: ["4200:4200"]
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health',timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 30s
+    mem_limit: 1024m
+
+  dagster:
+    <<: *python
+    command: ["sh", "-c", "mkdir -p /tmp/dagster && cp dagster.yaml /tmp/dagster/dagster.yaml && exec dagster-webserver -h 0.0.0.0 -p 3000 -w workspace.yaml"]
+    working_dir: /app/dagster
+    environment:
+      DAGSTER_HOME: /tmp/dagster
+      BI_USER: ${BI_USER}
+      BI_PASSWORD: ${BI_PASSWORD}
+    volumes: ["./dagster:/app/dagster:ro"]
+    ports: ["3000:3000"]
+    depends_on:
+      postgres: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/server_info',timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    mem_limit: 1024m
+
+  prefect-worker:
+    <<: *python
+    command: python serve.py
+    working_dir: /app/pipeline
+    volumes: ["./pipeline:/app/pipeline:ro"]
+    environment: *pipeline-env
+    depends_on:
+      postgres: {condition: service_healthy}
+      clickhouse: {condition: service_healthy}
+      prefect-server: {condition: service_healthy}
+      dagster: {condition: service_healthy}
+    mem_limit: 1024m
+
+  superset-init:
+    <<: *superset
+    build: ./docker/superset
+    restart: "no"
+    command: ["bash", "/app/init-nyc.sh"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      clickhouse: {condition: service_healthy}
+    mem_limit: 1024m
+
+  superset:
+    <<: *superset
+    restart: unless-stopped
+    command: ["gunicorn", "--bind", "0.0.0.0:8088", "--workers", "1", "--threads", "4", "--timeout", "120", "superset.app:create_app()"]
+    ports: ["8089:8088"]
+    depends_on:
+      superset-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8088/health',timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    mem_limit: 1024m
+
+  portal:
+    image: nginx:1.31.9-alpine@sha256:0563c36f94a6d3ec3584161b77859f740f7e20b4853f52c796a864ce6908e8ea
+    restart: unless-stopped
+    ports: ["${PORTAL_PORT:-80}:80"]
+    depends_on:
+      pgweb: {condition: service_healthy}
+    volumes:
+      - ./portal/index.html:/usr/share/nginx/html/index.html:ro
+      - ./docker/portal/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 64m
+    logging: *logging
+
+volumes:
+  postgres-data:
+  clickhouse-data:
